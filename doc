@@ -1,0 +1,66 @@
+## Documentação Básica — Endpoint `GET /token/price/:contract/:blockchain`
+
+### Visão geral
+
+Retorna o preço em dólar (USD) e a capitalização de mercado de um token ERC-20/BEP-20 (ou equivalente) a partir do endereço de contrato e da rede suportada.
+Internamente, o serviço consulta a API **CoinGecko / simple/token\_price** segundo a blockchain indicada.
+
+---
+
+### Endpoint
+
+| Método | Rota                                 | Descrição                          |
+| ------ | ------------------------------------ | ---------------------------------- |
+| `GET`  | `/token/price/:contract/:blockchain` | Obtém preço e market cap do token. |
+
+#### Parâmetros de rota
+
+| Nome         | Tipo     | Obrigatório | Descrição                                              |
+| ------------ | -------- | ----------- | ------------------------------------------------------ |
+| `contract`   | `string` | ✔           | Endereço completo do contrato (checksum ou minúsculo). |
+| `blockchain` | `string` | ✔           | Rede: `BNB`, `ETH`, `BASE` ou `ARB`.                   |
+
+> **Observação:** outros valores para `blockchain` geram erro `400 Invalid blockchain`.
+
+---
+
+### Exemplo de requisição
+
+```http
+GET /token/price/0xdAC17F958D2ee523a2206206994597C13D831ec7/ETH
+Host: api.seuservidor.com
+```
+
+**cURL**
+
+```bash
+curl https://api.seuservidor.com/token/price/0xdAC17F958D2ee523a2206206994597C13D831ec7/ETH
+```
+
+---
+
+### Respostas
+
+| HTTP                        | Corpo (JSON)                                                              | Descrição                                             |
+| --------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `200 OK`                    | `json { "status": 200, "data": { "price": 1.00, "cm": 1099999999.42 } } ` | Sucesso — preço (`price`) e market cap (`cm`) em USD. |
+| `400 Bad Request`           | `json { "status": 400, "message": "Invalid blockchain" } `                | Blockchain não suportada.                             |
+| `500 Internal Server Error` | Estrutura padrão `statusHandler`                                          | Erro inesperado ou falha na chamada CoinGecko.        |
+
+---
+
+### Variáveis de ambiente necessárias
+
+| Variável                 | Exemplo                                                            | Uso                                                      |
+| ------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------- |
+| `API_URL_COINGECKO_BNB`  | `https://api.coingecko.com/api/v3/simple/token_price/bnb-chain`    | URL base para BNB Chain                                  |
+| `API_URL_COINGECKO_ETH`  | `https://api.coingecko.com/api/v3/simple/token_price/ethereum`     |                                                          |
+| `API_URL_COINGECKO_BASE` | `https://api.coingecko.com/api/v3/simple/token_price/base`         |                                                          |
+| `API_URL_COINGECKO_ARB`  | `https://api.coingecko.com/api/v3/simple/token_price/arbitrum-one` |                                                          |
+| `API_KEY_COINGECKO`      | `cg-demo-abcdef123456`                                             | Chave de acesso (enviada no header `x-cg-demo-api-key`). |
+
+
+
+Criar Imagem docker -> docker build -t api-token .
+Subir container docker -> docker run -d --name api-token -p 3000:3000 api-token
+
